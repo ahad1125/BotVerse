@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import ssl
 from datetime import timedelta
 
 
@@ -189,14 +190,21 @@ STATICFILES_DIRS=[BASE_DIR/'static']
 
 ###  CELERY PLUS REDIS CONFIGURATIONS
 
-def get_redis_url():
-    url = os.getenv('CELERY_BROKER_URL', os.getenv('REDIS_URL', 'redis://localhost:6379/0'))
-    if url and url.startswith('rediss://') and 'ssl_cert_reqs' not in url:
-        url += '&ssl_cert_reqs=CERT_NONE' if '?' in url else '?ssl_cert_reqs=CERT_NONE'
-    return url
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', os.getenv('REDIS_URL', 'redis://localhost:6379/0'))
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', os.getenv('REDIS_URL', 'redis://localhost:6379/0'))
 
-CELERY_BROKER_URL = get_redis_url()
-CELERY_RESULT_BACKEND = get_redis_url()
+if CELERY_BROKER_URL.startswith('rediss://'):
+    # Remove any query parameters that might confuse Celery
+    CELERY_BROKER_URL = CELERY_BROKER_URL.split('?')[0]
+    CELERY_RESULT_BACKEND = CELERY_RESULT_BACKEND.split('?')[0]
+    
+    # Configure SSL explicitly
+    CELERY_BROKER_USE_SSL = {
+        'ssl_cert_reqs': ssl.CERT_NONE
+    }
+    CELERY_REDIS_BACKEND_USE_SSL = {
+        'ssl_cert_reqs': ssl.CERT_NONE
+    }
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
