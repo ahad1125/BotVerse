@@ -211,7 +211,9 @@ class BotQRCodeView(APIView):
         
         bot=get_object_or_404(Bot,pk=bot_pk,owner=request.user)
         
-        hosted_link=f'http://localhost:5173/chat/{bot.id}'
+        import os
+        frontend_url = os.getenv('FRONTEND_URL', 'https://botverse-app.vercel.app').rstrip('/')
+        hosted_link=f'{frontend_url}/chat/{bot.id}'
         
         qr=qrcode.make(hosted_link)
         
