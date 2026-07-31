@@ -1,7 +1,5 @@
 import chromadb
-from sentence_transformers import SentenceTransformer
 import os
-# import google.generativeai as genai
 from google import genai
 import json
 import re
@@ -11,8 +9,21 @@ import numpy as np
 
 gemini_client=genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
 
-embedding_model=SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 chroma_client=chromadb.PersistentClient(path='./chromadb/')
+
+def get_gemini_embeddings(texts):
+    if isinstance(texts, str):
+        texts = [texts]
+    try:
+        response = gemini_client.models.embed_content(
+            model="text-embedding-004",
+            contents=texts,
+        )
+        return [np.array(e.values) for e in response.embeddings]
+    except Exception as e:
+        print(f"Gemini embedding API failed: {e}")
+        # text-embedding-004 has 768 dimensions
+        return [np.zeros(768) for _ in texts]
 
 def retrieve_relevant_chunks(bot_id, question, top_k=3):
     
@@ -21,7 +32,7 @@ def retrieve_relevant_chunks(bot_id, question, top_k=3):
     if collection.count() == 0:
         return []
     
-    question_embedding = embedding_model.encode([question])[0]
+    question_embedding = get_gemini_embeddings(question)[0]
     
     try:
         results = collection.query(
@@ -110,7 +121,7 @@ def chunk_text(text, chunk_size=800, overlap=150):
 
 
 def embed_chunks(chunks):
-    emdeddings=embedding_model.encode(chunks)
+    emdeddings = np.array(get_gemini_embeddings(chunks))
     return emdeddings
 
 
@@ -329,7 +340,7 @@ def cluster_similar_questions(questions,distance_threshold=0.3):
     
     
     
-    embeddings=embedding_model.encode(questions)
+    embeddings = np.array(get_gemini_embeddings(questions))
     
     clustering=AgglomerativeClustering(
         n_clusters=None,
