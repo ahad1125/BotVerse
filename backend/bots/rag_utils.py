@@ -3,6 +3,7 @@ import os
 from google import genai
 import json
 import re
+import requests
 from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 
@@ -11,19 +12,31 @@ gemini_client=genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
 
 chroma_client=chromadb.PersistentClient(path='./chromadb/')
 
-def get_gemini_embeddings(texts):
+def get_hf_embeddings(texts):
     if isinstance(texts, str):
         texts = [texts]
+    
+    api_url = "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    hf_token = os.getenv('HF_TOKEN')
+    
+    headers = {}
+    if hf_token:
+        headers["Authorization"] = f"Bearer {hf_token}"
+        
     try:
-        response = gemini_client.models.embed_content(
-            model="text-embedding-004",
-            contents=texts,
-        )
-        return [np.array(e.values) for e in response.embeddings]
+        response = requests.post(api_url, headers=headers, json={"inputs": texts}, timeout=20)
+        result = response.json()
+        if isinstance(result, list):
+            if len(result) > 0 and not isinstance(result[0], list):
+                return [np.array(result)]
+            return [np.array(e) for e in result]
+        else:
+            print(f"HF Inference API returned unexpected result format: {result}")
+            # paraphrase-multilingual-MiniLM-L12-v2 has 384 dimensions
+            return [np.zeros(384) for _ in texts]
     except Exception as e:
-        print(f"Gemini embedding API failed: {e}")
-        # text-embedding-004 has 768 dimensions
-        return [np.zeros(768) for _ in texts]
+        print(f"HF Inference API failed: {e}")
+        return [np.zeros(384) for _ in texts]
 
 def retrieve_relevant_chunks(bot_id, question, top_k=3):
     
@@ -32,7 +45,7 @@ def retrieve_relevant_chunks(bot_id, question, top_k=3):
     if collection.count() == 0:
         return []
     
-    question_embedding = get_gemini_embeddings(question)[0]
+    question_embedding = get_hf_embeddings(question)[0]
     
     try:
         results = collection.query(
@@ -121,7 +134,7 @@ def chunk_text(text, chunk_size=800, overlap=150):
 
 
 def embed_chunks(chunks):
-    emdeddings = np.array(get_gemini_embeddings(chunks))
+    emdeddings = np.array(get_hf_embeddings(chunks))
     return emdeddings
 
 
@@ -340,7 +353,7 @@ def cluster_similar_questions(questions,distance_threshold=0.3):
     
     
     
-    embeddings = np.array(get_gemini_embeddings(questions))
+    embeddings = np.array(get_hf_embeddings(questions))
     
     clustering=AgglomerativeClustering(
         n_clusters=None,
