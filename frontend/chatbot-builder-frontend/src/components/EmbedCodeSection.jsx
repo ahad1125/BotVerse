@@ -6,7 +6,8 @@ import { Copy, Check, Code } from "lucide-react";
 function EmbedCodeSection({ botId }) {
   const [copied, setCopied] = useState(false);
 
-  const snippet = `<script src='http://127.0.0.1:8000/static/widget.js' data-bot-id=${botId}></script>`;
+  const apiHost = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api/v1', '') : 'http://127.0.0.1:8000';
+  const snippet = `<script src='${apiHost}/static/widget.js' data-bot-id=${botId}></script>`;
 
   const handleCopy = async () => {
     try {
