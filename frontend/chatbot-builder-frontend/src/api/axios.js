@@ -1,8 +1,17 @@
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
 
+const getApiBaseUrl = () => {
+    let url = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1';
+    url = url.replace(/\/+$/, '');
+    if (!url.endsWith('/api/v1')) {
+        url += '/api/v1';
+    }
+    return url;
+};
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1',
+    baseURL: getApiBaseUrl(),
 })
 
 
@@ -47,7 +56,7 @@ api.interceptors.response.use(
                 if (!refreshToken) {
                     throw new Error('No refresh token');
                 }
-                const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1'}/auth/token/refresh/`, {
+                const response = await axios.post(`${getApiBaseUrl()}/auth/token/refresh/`, {
                     refresh: refreshToken,
                 });
 
