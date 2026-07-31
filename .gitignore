@@ -1,0 +1,36 @@
+# Python virtual environments
+backend/venv/
+backend/.venv/
+venv/
+.venv/
+ENV/
+env/
+
+# Python caching & bytecode
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+
+# Local environment variables
+.env
+backend/.env
+frontend/chatbot-builder-frontend/.env
+
+# Node.js dependencies & build outputs
+**/node_modules/
+frontend/chatbot-builder-frontend/dist/
+dist/
+
+# SQLite databases
+*.sqlite3
+backend/db.sqlite3
+
+# Uploaded media & documents
+backend/media/
+media/
+
+# IDE files & OS cache
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
