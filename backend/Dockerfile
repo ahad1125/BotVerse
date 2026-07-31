@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 # Install requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir gunicorn psycopg2-binary dj-database-url
+RUN pip install --no-cache-dir gunicorn psycopg2-binary dj-database-url django-cloudinary-storage cloudinary
 
 # Copy code
 COPY . .
