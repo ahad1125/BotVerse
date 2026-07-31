@@ -44,7 +44,18 @@ function Register() {
 
       navigate("/verify-otp", { state: { email } });
     } catch (error) {
-      setError(error.response?.data?.detail || "Something went wrong.");
+      const respData = error.response?.data;
+      let errMsg = "Something went wrong.";
+      if (respData?.errors) {
+        // Extract the first error message from the dictionary
+        const firstErrorKey = Object.keys(respData.errors)[0];
+        if (firstErrorKey) errMsg = respData.errors[firstErrorKey][0] || respData.errors[firstErrorKey];
+      } else if (respData?.message) {
+        errMsg = respData.message;
+      } else if (respData?.detail) {
+        errMsg = respData.detail;
+      }
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
