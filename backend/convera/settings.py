@@ -38,7 +38,11 @@ SECRET_KEY = 'django-insecure-#b+rhi)19wahy^%-=_3j_*(o398&0g19ltns5k_@0@g1$629bx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://botverse-9eld.onrender.com',
+    'https://*.onrender.com'
+]
 
 
 # Application definition
