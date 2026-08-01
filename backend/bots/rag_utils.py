@@ -16,8 +16,15 @@ def get_gemini_embeddings(texts):
         texts = [texts]
         
     try:
+        # Dynamically find an available embedding model
+        model_name = 'text-embedding-004' # Fallback default
+        for m in gemini_client.models.list():
+            if 'embedContent' in m.supported_actions or 'embed' in m.name:
+                model_name = m.name
+                break
+                
         response = gemini_client.models.embed_content(
-            model='text-embedding-004',
+            model=model_name,
             contents=texts
         )
         return [np.array(e.values) for e in response.embeddings]
