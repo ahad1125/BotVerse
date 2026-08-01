@@ -102,7 +102,7 @@ class KnowledgeChunk(models.Model):
     source_name=models.CharField(max_length=255)
     source_type=models.CharField(max_length=50)
     content=models.TextField()
-    embedding = VectorField(dimensions=384)
+    embedding = VectorField(dimensions=768)
     created_at=models.DateTimeField(auto_now_add=True)
     
     class Meta:

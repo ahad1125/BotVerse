@@ -11,46 +11,26 @@ import numpy as np
 gemini_client=genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
 
 
-def get_hf_embeddings(texts):
+def get_gemini_embeddings(texts):
     if isinstance(texts, str):
         texts = [texts]
-    
-    api_url = "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-    hf_token = os.getenv('HF_TOKEN')
-    
-    headers = {}
-    if hf_token:
-        headers["Authorization"] = f"Bearer {hf_token}"
         
-    import time
-    max_retries = 10
-    for attempt in range(max_retries):
-        try:
-            response = requests.post(api_url, headers=headers, json={"inputs": texts}, timeout=20)
-            result = response.json()
-            if isinstance(result, list):
-                if len(result) > 0 and not isinstance(result[0], list):
-                    return [np.array(result)]
-                return [np.array(e) for e in result]
-            elif isinstance(result, dict) and "estimated_time" in result:
-                wait_time = result["estimated_time"]
-                print(f"HF Inference API loading model. Waiting {wait_time}s...")
-                time.sleep(min(wait_time, 5)) # Wait up to 5s before retrying
-                continue
-            else:
-                raise Exception(f"HF Inference API returned unexpected result format: {result}")
-        except Exception as e:
-            print(f"HF Inference API failed on attempt {attempt+1}: {e}")
-            time.sleep(2)
-            
-    raise Exception(f"HF Inference API failed after {max_retries} attempts.")
+    try:
+        response = gemini_client.models.embed_content(
+            model='text-embedding-004',
+            contents=texts
+        )
+        return [np.array(e.values) for e in response.embeddings]
+    except Exception as e:
+        raise Exception(f"Gemini API Embedding failed: {e}")
+
 
 def retrieve_relevant_chunks(bot_id, question, top_k=3):
     from pgvector.django import CosineDistance
     from bots.models import KnowledgeChunk
     
     try:
-        question_embedding = get_hf_embeddings(question)[0]
+        question_embedding = get_gemini_embeddings(question)[0]
     
         db_chunks = KnowledgeChunk.objects.filter(bot_id=bot_id).annotate(
             distance=CosineDistance('embedding', question_embedding.tolist())
@@ -130,7 +110,7 @@ def embed_chunks(chunks, batch_size=5):
     all_embeddings = []
     for i in range(0, len(chunks), batch_size):
         batch = chunks[i:i + batch_size]
-        batch_embeddings = get_hf_embeddings(batch)
+        batch_embeddings = get_gemini_embeddings(batch)
         all_embeddings.extend(batch_embeddings)
     return np.array(all_embeddings)
 
