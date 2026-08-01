@@ -38,21 +38,20 @@ def get_hf_embeddings(texts):
                 time.sleep(min(wait_time, 5)) # Wait up to 5s before retrying
                 continue
             else:
-                print(f"HF Inference API returned unexpected result format: {result}")
-                return [np.zeros(384) for _ in texts]
+                raise Exception(f"HF Inference API returned unexpected result format: {result}")
         except Exception as e:
             print(f"HF Inference API failed on attempt {attempt+1}: {e}")
             time.sleep(2)
             
-    return [np.zeros(384) for _ in texts]
+    raise Exception(f"HF Inference API failed after {max_retries} attempts.")
 
 def retrieve_relevant_chunks(bot_id, question, top_k=3):
     from pgvector.django import CosineDistance
     from bots.models import KnowledgeChunk
     
-    question_embedding = get_hf_embeddings(question)[0]
-    
     try:
+        question_embedding = get_hf_embeddings(question)[0]
+    
         db_chunks = KnowledgeChunk.objects.filter(bot_id=bot_id).annotate(
             distance=CosineDistance('embedding', question_embedding.tolist())
         ).order_by('distance')[:top_k]
@@ -69,7 +68,7 @@ def retrieve_relevant_chunks(bot_id, question, top_k=3):
             ) for c in db_chunks
         ]
     except Exception as e:
-        print(f"pgvector query failed for bot {bot_id}: {e}")
+        print(f"Retrieval query failed for bot {bot_id}: {e}")
         return []
 
 
