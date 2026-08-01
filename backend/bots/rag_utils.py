@@ -25,7 +25,8 @@ def get_gemini_embeddings(texts):
                 
         response = gemini_client.models.embed_content(
             model=model_name,
-            contents=texts
+            contents=texts,
+            config={'output_dimensionality': 768}
         )
         return [np.array(e.values) for e in response.embeddings]
     except Exception as e:
