@@ -19,7 +19,7 @@ def generate_and_send_otp(user):
     message=f'Your verification code is {code}. It expires in 10 minutes.\n\nIf you did not request this, you can ignore this email.',
     from_email=settings.DEFAULT_FROM_EMAIL,
     recipient_list=[user.email],
-    fail_silently=False
+    fail_silently=True
 )
     
     
