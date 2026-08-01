@@ -115,7 +115,10 @@ def process_knowledge_source(id):
         source.save()
         
     except Exception as e:
-        print(f'FAILED processing {id}: {e}')
+        import traceback
+        error_msg = traceback.format_exc()
+        print(f'FAILED processing {id}: {error_msg}')
+        source.text_content = error_msg
         source.status='failure'
         source.save()
     
