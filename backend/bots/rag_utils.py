@@ -1,4 +1,4 @@
-import chromadb
+
 import os
 from google import genai
 import json
@@ -10,7 +10,6 @@ import numpy as np
 
 gemini_client=genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
 
-chroma_client=chromadb.PersistentClient(path='./chromadb/')
 
 def get_hf_embeddings(texts):
     if isinstance(texts, str):
@@ -39,46 +38,35 @@ def get_hf_embeddings(texts):
         return [np.zeros(384) for _ in texts]
 
 def retrieve_relevant_chunks(bot_id, question, top_k=3):
-    
-    collection = get_bot_collection(bot_id)
-    
-    if collection.count() == 0:
-        return []
+    from pgvector.django import CosineDistance
+    from bots.models import KnowledgeChunk
     
     question_embedding = get_hf_embeddings(question)[0]
     
     try:
-        results = collection.query(
-            query_embeddings=[question_embedding.tolist()],
-            n_results=top_k
-        )
+        db_chunks = KnowledgeChunk.objects.filter(bot_id=bot_id).annotate(
+            distance=CosineDistance('embedding', question_embedding.tolist())
+        ).order_by('distance')[:top_k]
+        
+        return [
+            (
+                c.content, 
+                c.distance, 
+                {
+                    'source_id': c.source_id,
+                    'source_name': c.source_name,
+                    'source_type': c.source_type,
+                }
+            ) for c in db_chunks
+        ]
     except Exception as e:
-        print(f"ChromaDB query failed for bot {bot_id}: {e}")
+        print(f"pgvector query failed for bot {bot_id}: {e}")
         return []
-    
-    chunks = results['documents'][0]
-    distances = results['distances'][0]
-    metadatas = results['metadatas'][0]
-    
-    return list(zip(chunks, distances, metadatas))
-
-def get_bot_collection(bot_id):
-    
-    collection_name=f'bot_{bot_id}'
-    
-    collection=chroma_client.get_or_create_collection(name=collection_name,
-         configuration={'hnsw':{'space':'cosine'}})
-    return collection
 
 
 
 def store_chunks(bot_id,source,chunks,embeddings):
-    
-    collection=get_bot_collection(bot_id)
-    
-    
-    ids=[f'{source.id}_{i}' for i in range(len(chunks))]
-    
+    from bots.models import KnowledgeChunk
     
     source_name = (
         source.file.name.split('/')[-1] if source.file
@@ -86,22 +74,19 @@ def store_chunks(bot_id,source,chunks,embeddings):
         else f"Text note ({source.created_at.strftime('%b %d, %Y')})"
     )
     
+    knowledge_chunks = []
     
-    
-    metadatas=[
-        {
-        'source_id':str(source.id),
-        'source_name':source_name,
-        'source_type':source.source_type,
-        } for _ in chunks]
-    
-    
-    collection.add(
-        ids=ids,
-        embeddings=embeddings.tolist(),
-        documents=chunks,
-        metadatas=metadatas,
-    )    
+    for i in range(len(chunks)):
+        knowledge_chunks.append(KnowledgeChunk(
+            bot_id=bot_id,
+            source_id=str(source.id),
+            source_name=source_name,
+            source_type=source.source_type,
+            content=chunks[i],
+            embedding=embeddings[i].tolist()
+        ))
+        
+    KnowledgeChunk.objects.bulk_create(knowledge_chunks)
 
 
 def chunk_text(text, chunk_size=800, overlap=150):

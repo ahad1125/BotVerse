@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from users.models import User
 from .storage import RawMediaCloudinaryStorage
+from pgvector.django import VectorField
 # Create your models here.
 
 class Language(models.TextChoices):
@@ -94,7 +95,18 @@ class KnowledgeSource(models.Model):
     class Meta:
         ordering=['-created_at']
     
+class KnowledgeChunk(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    bot=models.ForeignKey(Bot,on_delete=models.CASCADE,related_name='knowledge_chunks')
+    source_id=models.CharField(max_length=255)
+    source_name=models.CharField(max_length=255)
+    source_type=models.CharField(max_length=50)
+    content=models.TextField()
+    embedding = VectorField(dimensions=384)
+    created_at=models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        ordering=['-created_at']
     
 class QuickReply(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
