@@ -23,7 +23,7 @@ def get_hf_embeddings(texts):
         headers["Authorization"] = f"Bearer {hf_token}"
         
     import time
-    max_retries = 3
+    max_retries = 10
     for attempt in range(max_retries):
         try:
             response = requests.post(api_url, headers=headers, json={"inputs": texts}, timeout=20)
