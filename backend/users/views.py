@@ -28,6 +28,7 @@ class RegisterView(generics.CreateAPIView):
     queryset=User.objects.all()
     serializer_class=RegisterSerializer
     permission_classes=[AllowAny]
+    authentication_classes = []
     
     def create(self,request,*args,**kwargs):
         
@@ -97,6 +98,7 @@ class MeView(generics.RetrieveUpdateAPIView):
     
 class VerifyOTPView(APIView):
     permission_classes=[AllowAny]
+    authentication_classes = []
     
     def post(self,request):
         email=request.data.get('email')
@@ -142,6 +144,7 @@ class VerifyOTPView(APIView):
         },status=status.HTTP_200_OK)
 class ResendOTPView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request):
         email = request.data.get('email')
