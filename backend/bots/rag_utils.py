@@ -338,7 +338,7 @@ def cluster_similar_questions(questions,distance_threshold=0.3):
     
     
     
-    embeddings = np.array(get_hf_embeddings(questions))
+    embeddings = np.array(get_gemini_embeddings(questions))
     
     clustering=AgglomerativeClustering(
         n_clusters=None,
