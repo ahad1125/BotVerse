@@ -2,6 +2,7 @@
 
 # Apply database migrations
 python manage.py migrate --noinput
+python manage.py collectstatic --noinput
 
 # Start Celery worker in the background only if explicitly requested (e.g. if you upgrade RAM)
 if [ "$START_CELERY_WORKER" = "True" ]; then

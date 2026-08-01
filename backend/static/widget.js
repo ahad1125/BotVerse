@@ -1,7 +1,22 @@
 (function () {
     const scriptTag = document.currentScript;
     const botId = scriptTag.getAttribute('data-bot-id');
-    const apiBase = scriptTag.getAttribute('data-api-base') || ('http://127.0.0.1:8000/api/v1')
+    
+    // Automatically detect API host from the script src URL
+    // e.g. if loaded from 'https://botverse-9eld.onrender.com/static/widget.js',
+    // the fallback base is 'https://botverse-9eld.onrender.com/api/v1'
+    const scriptSrc = scriptTag ? scriptTag.src : '';
+    let defaultApiBase = 'http://127.0.0.1:8000/api/v1';
+    if (scriptSrc && scriptSrc.startsWith('http')) {
+        try {
+            const url = new URL(scriptSrc);
+            defaultApiBase = url.origin + '/api/v1';
+        } catch (e) {
+            console.error('Widget: failed to parse script src URL', e);
+        }
+    }
+    
+    const apiBase = scriptTag.getAttribute('data-api-base') || defaultApiBase;
 
     if (!botId) {
         console.error('Widget : data-bot-id is required.')
