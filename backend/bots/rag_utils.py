@@ -126,9 +126,13 @@ def chunk_text(text, chunk_size=800, overlap=150):
     return chunks
 
 
-def embed_chunks(chunks):
-    emdeddings = np.array(get_hf_embeddings(chunks))
-    return emdeddings
+def embed_chunks(chunks, batch_size=5):
+    all_embeddings = []
+    for i in range(0, len(chunks), batch_size):
+        batch = chunks[i:i + batch_size]
+        batch_embeddings = get_hf_embeddings(batch)
+        all_embeddings.extend(batch_embeddings)
+    return np.array(all_embeddings)
 
 
 def generate_answer(bot,question,retreived_chunks,fallback_message,confidence_threshold=0.9,lead_captured=False):
