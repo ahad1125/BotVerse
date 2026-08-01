@@ -234,13 +234,15 @@ class ConversationMessagesView(APIView):
         conversation=get_object_or_404(Conversation,pk=conversation_pk,bot=bot)
         messages=conversation.messages.all().order_by('created_at')
         
+        import math
+        
         data=[
             {
                 'id':m.id,
                 'sender':m.sender,
                 'content':m.content,
                 'created_at':m.created_at,
-                'confidence_score':m.confidence_score
+                'confidence_score': None if m.confidence_score is not None and math.isnan(m.confidence_score) else m.confidence_score
             }
             for m in messages
         ]
