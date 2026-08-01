@@ -22,20 +22,29 @@ def get_hf_embeddings(texts):
     if hf_token:
         headers["Authorization"] = f"Bearer {hf_token}"
         
-    try:
-        response = requests.post(api_url, headers=headers, json={"inputs": texts}, timeout=20)
-        result = response.json()
-        if isinstance(result, list):
-            if len(result) > 0 and not isinstance(result[0], list):
-                return [np.array(result)]
-            return [np.array(e) for e in result]
-        else:
-            print(f"HF Inference API returned unexpected result format: {result}")
-            # paraphrase-multilingual-MiniLM-L12-v2 has 384 dimensions
-            return [np.zeros(384) for _ in texts]
-    except Exception as e:
-        print(f"HF Inference API failed: {e}")
-        return [np.zeros(384) for _ in texts]
+    import time
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(api_url, headers=headers, json={"inputs": texts}, timeout=20)
+            result = response.json()
+            if isinstance(result, list):
+                if len(result) > 0 and not isinstance(result[0], list):
+                    return [np.array(result)]
+                return [np.array(e) for e in result]
+            elif isinstance(result, dict) and "estimated_time" in result:
+                wait_time = result["estimated_time"]
+                print(f"HF Inference API loading model. Waiting {wait_time}s...")
+                time.sleep(min(wait_time, 5)) # Wait up to 5s before retrying
+                continue
+            else:
+                print(f"HF Inference API returned unexpected result format: {result}")
+                return [np.zeros(384) for _ in texts]
+        except Exception as e:
+            print(f"HF Inference API failed on attempt {attempt+1}: {e}")
+            time.sleep(2)
+            
+    return [np.zeros(384) for _ in texts]
 
 def retrieve_relevant_chunks(bot_id, question, top_k=3):
     from pgvector.django import CosineDistance
