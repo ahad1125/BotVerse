@@ -10,8 +10,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view
 
-from rest_framework.decorators import action
+from rest_framework.decorators import action,api_view,permission_classes
 
 
 import qrcode
@@ -293,3 +294,10 @@ class ConversationListView(APIView):
             'data': serializer.data,
             'message': 'OK'
         }, status=status.HTTP_200_OK)
+        
+@api_view(['GET'])     
+@permission_classes([AllowAny])   
+def health_check(request):
+    return Response({
+        'status':'ok'
+    })
