@@ -11,23 +11,23 @@ The following diagram illustrates the flow of data and interaction between the f
 ```mermaid
 graph TD
     %% Styling
-    classDef frontend fill:#3B82F6,stroke:#1D4ED8,stroke-width:2px,color:#fff;
-    classDef backend fill:#10B981,stroke:#047857,stroke-width:2px,color:#fff;
-    classDef broker fill:#F59E0B,stroke:#D97706,stroke-width:2px,color:#fff;
-    classDef worker fill:#8B5CF6,stroke:#6D28D9,stroke-width:2px,color:#fff;
-    classDef db fill:#EF4444,stroke:#B91C1C,stroke-width:2px,color:#fff;
-    classDef ai fill:#EC4899,stroke:#BE185D,stroke-width:2px,color:#fff;
-    classDef external fill:#6B7280,stroke:#374151,stroke-width:2px,color:#fff;
+    classDef frontend fill:#3B82F6,stroke:#1D4ED8,stroke-width:2px,color:#FFF
+    classDef backend fill:#10B981,stroke:#047857,stroke-width:2px,color:#FFF
+    classDef broker fill:#F59E0B,stroke:#D97706,stroke-width:2px,color:#FFF
+    classDef worker fill:#8B5CF6,stroke:#6D28D9,stroke-width:2px,color:#FFF
+    classDef db fill:#EF4444,stroke:#B91C1C,stroke-width:2px,color:#FFF
+    classDef ai fill:#EC4899,stroke:#BE185D,stroke-width:2px,color:#FFF
+    classDef external fill:#6B7280,stroke:#374151,stroke-width:2px,color:#FFF
 
     %% Nodes
-    Frontend[React Frontend: Vite]:::frontend
-    Backend[Django REST Backend]:::backend
-    Redis[(Redis Broker)]:::broker
-    Celery[Celery Workers]:::worker
-    Postgres[(PostgreSQL DB + pgvector)]:::db
-    Gemini[Gemini API Client]:::ai
-    Cloudinary[Cloudinary Cloud Storage]:::external
-    Widget[Embeddable Widget JS]:::frontend
+    Frontend["React Frontend: Vite"]:::frontend
+    Backend["Django REST Backend"]:::backend
+    Redis[("Redis Broker")]:::broker
+    Celery["Celery Workers"]:::worker
+    Postgres[("PostgreSQL DB + pgvector")]:::db
+    Gemini["Gemini API Client"]:::ai
+    Cloudinary["Cloudinary Cloud Storage"]:::external
+    Widget["Embeddable Widget JS"]:::frontend
 
     %% Flow
     Frontend -- "API Requests (JWT / Chat / Analytics)" --> Backend
