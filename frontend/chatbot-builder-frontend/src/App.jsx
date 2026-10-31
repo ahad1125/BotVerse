@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import "./App.css";
 import Login from "./pages/Login";
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -12,7 +10,6 @@ import BotDetail from "./pages/BotDetail";
 import ChatPlayground from "./pages/ChatPlayground";
 import Analytics from "./pages/Analytics";
 import PublicChat from "./pages/PublicChat";
-import VerifyOTP from "./pages/VerifyOTP";
 import Home from "./pages/Home";
 
 function App() {
@@ -21,23 +18,25 @@ function App() {
   return (
     <Routes>
       {/* Public Routes */}
-
       <Route element={<PublicRoute />}>
-        {/* <Route path="/" element={<Navigate to="/login" replace />} /> */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Route>
       <Route path="/chat/:id" element={<PublicChat />} />
-      <Route path="/verify-otp" element={<VerifyOTP />} />
+      <Route path="/verify-otp" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/home" element={<Navigate to="/" replace />} />
       <Route path="/" element={<Home />} />
-      {/* Protected Routes */}
 
+      {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/bots/:id" element={<BotDetail />} />
         <Route path="bots/:id/chat" element={<ChatPlayground />} />
         <Route path="bots/:id/analytics" element={<Analytics />} />
       </Route>
+
+      {/* Fallback route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

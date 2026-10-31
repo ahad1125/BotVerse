@@ -106,7 +106,7 @@ function CreateKnowledgeSourceUpload({ isOpen, onClose, botId }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="w-[calc(100vw-2rem)] sm:w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Add Knowledge Source</DialogTitle>
         </DialogHeader>
@@ -206,18 +206,20 @@ function CreateKnowledgeSourceUpload({ isOpen, onClose, botId }) {
             </div>
           )}
 
-          <div className="flex justify-end gap-3 border-t pt-4">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3 border-t pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
               disabled={createKnowledgeSourceMutation.isPending}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={createKnowledgeSourceMutation.isPending}
+              className="w-full sm:w-auto"
             >
               {createKnowledgeSourceMutation.isPending
                 ? "Processing..."

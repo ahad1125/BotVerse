@@ -61,9 +61,9 @@ function QuickRepliesManager({ botId }) {
   };
 
   return (
-    <div className="rounded-xl border bg-card p-5 space-y-4 shadow-xs">
+    <div className="rounded-xl border bg-card p-4 sm:p-5 space-y-4 shadow-xs">
       <div className="flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
           <MessageSquareReply className="h-4 w-4" />
         </div>
         <div>
@@ -77,13 +77,13 @@ function QuickRepliesManager({ botId }) {
       {data?.results?.length > 0 ? (
         <div className="flex flex-wrap gap-2 py-2">
           {data.results.map((qr) => (
-            <Badge key={qr.id} variant="secondary" className="pl-3 pr-1 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 border">
-              {qr.text}
+            <Badge key={qr.id} variant="secondary" className="pl-3 pr-1 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 border max-w-full">
+              <span className="truncate">{qr.text}</span>
               <button
                 type="button"
                 onClick={() => handleDelete(qr.id, qr.text)}
                 disabled={deleteMutation.isPending}
-                className="rounded-full p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors outline-none cursor-pointer"
+                className="rounded-full p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors outline-none cursor-pointer shrink-0"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -96,7 +96,7 @@ function QuickRepliesManager({ botId }) {
         </p>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -106,7 +106,7 @@ function QuickRepliesManager({ botId }) {
           className="flex-1"
         />
 
-        <Button onClick={handleAdd} disabled={createMutation.isPending || !text.trim()}>
+        <Button onClick={handleAdd} disabled={createMutation.isPending || !text.trim()} className="w-full sm:w-auto">
           {createMutation.isPending ? "Adding..." : "Add"}
         </Button>
       </div>

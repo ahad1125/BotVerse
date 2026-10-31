@@ -48,14 +48,14 @@ function EmbedCodeSection({ botId }) {
         </pre>
       </div>
 
-      <div className="flex items-center justify-between border-t pt-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t pt-4">
         <p className="text-xs text-muted-foreground">
           Paste this snippet before the closing <code>&lt;/body&gt;</code> tag on your website.
         </p>
         <Button
           onClick={handleCopy}
           size="sm"
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto shrink-0"
         >
           {copied ? (
             <>

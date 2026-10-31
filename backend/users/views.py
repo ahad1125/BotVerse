@@ -12,7 +12,6 @@ from .serializers import RegisterSerializer,UserSerializer
 from .models import User
 from datetime import timedelta
 from django.utils import timezone
-from .utils import generate_and_send_otp
 
 
 def api_response(success,data=None,message='',errors=None,status_code=status.HTTP_200_OK):
@@ -36,12 +35,17 @@ class RegisterView(generics.CreateAPIView):
         if not serializer.is_valid():
             return api_response(False,errors=serializer.errors,message='Registration Failed',status_code=status.HTTP_400_BAD_REQUEST)
         user=serializer.save()
-        generate_and_send_otp(user)
-        return api_response(True,data=UserSerializer(user).data,message='Registration successful',
+        # Issue JWT tokens immediately — no OTP email step required
+        refresh = RefreshToken.for_user(user)
+        token_data = {
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': UserSerializer(user).data,
+        }
+        return api_response(True,data=token_data,message='Registration successful',
                             status_code=status.HTTP_201_CREATED)
         
-    
-        
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     
@@ -94,76 +98,3 @@ class MeView(generics.RetrieveUpdateAPIView):
                                 status_code=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         return api_response(True,data=serializer.data,message='Profile updated')
-    
-    
-class VerifyOTPView(APIView):
-    permission_classes=[AllowAny]
-    authentication_classes = []
-    
-    def post(self,request):
-        email=request.data.get('email')
-        code=request.data.get('code')
-        
-        if not email or not code:
-            return Response({
-                'success':False,
-                'message':'Email and code are required.',
-            },status=status.HTTP_400_BAD_REQUEST)
-            
-            
-        try:
-            user=User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({
-                'success':False,
-                'message':'Invalid email or code.'
-                
-            },status=status.HTTP_400_BAD_REQUEST)
-            
-        if not user.otp_code or user.otp_code!=code:
-            return Response({
-                'success':False,
-                'message':'Invalid code.'
-            },status=status.HTTP_400_BAD_REQUEST)
-            
-        if timezone.now() > user.otp_created_at + timedelta(minutes=10):
-            return Response({
-                'success': False,
-                'message': 'Code expired.'
-                },status=status.HTTP_400_BAD_REQUEST)
-            
-        user.is_email_verified=True
-        user.otp_code=None
-        user.otp_created_at=None
-        user.save()
-        
-        return Response({
-            'success':True,
-            'message':'Email verified successfully.'
-        },status=status.HTTP_200_OK)
-class ResendOTPView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = []
-
-    def post(self, request):
-        email = request.data.get('email')
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({
-                'success': False, 
-                'message': 'User not found.'
-                },status=status.HTTP_404_NOT_FOUND)
-
-        if user.is_email_verified:
-            return Response({
-                'success': False,
-                'message': 'Email already verified.'
-                },status=status.HTTP_400_BAD_REQUEST)
-
-        generate_and_send_otp(user)
-        return Response({
-            'success': True,
-            'message': 'Verification code resent.'
-            }, status=status.HTTP_200_OK)
-        

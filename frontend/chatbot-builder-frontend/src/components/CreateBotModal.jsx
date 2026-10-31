@@ -157,7 +157,7 @@ function CreateBotModal({ isOpen, isClose, bot }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="w-[calc(100vw-2rem)] sm:w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{bot ? "Edit Bot" : "Create New Bot"}</DialogTitle>
         </DialogHeader>
@@ -322,16 +322,17 @@ function CreateBotModal({ isOpen, isClose, bot }) {
             </p>
           )}
 
-          <div className="flex items-center justify-end gap-3 border-t pt-5">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-end gap-2.5 sm:gap-3 border-t pt-4 sm:pt-5">
             <Button
               type="button"
               variant="outline"
               disabled={isPending}
               onClick={handleClose}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
               {isPending
                 ? bot
                   ? "Saving…"

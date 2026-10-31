@@ -139,76 +139,93 @@ function BotDetail() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 p-8">
+    <div className="mx-auto max-w-5xl space-y-6 sm:space-y-8 p-4 sm:p-6 md:p-8">
       {/* Header */}
       <div>
         <Button
           variant="ghost"
           size="sm"
-          className="mb-2 gap-1 text-muted-foreground"
+          className="mb-2 gap-1 text-muted-foreground -ml-2"
           onClick={() => navigate("/dashboard")}
         >
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
 
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             {bot.avatar ? (
               <img
                 src={bot.avatar}
                 alt={bot.name}
-                className="h-12 w-12 rounded-full object-cover"
+                className="h-11 w-11 sm:h-12 sm:w-12 rounded-full object-cover shrink-0"
               />
             ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted font-medium text-muted-foreground">
+              <div className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-muted font-medium text-muted-foreground shrink-0">
                 {bot.name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-semibold tracking-tight">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
                   {bot.name}
                 </h1>
                 <Badge variant={bot.is_active ? "default" : "secondary"}>
                   {bot.is_active ? "Active" : "Inactive"}
                 </Badge>
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                 {bot.business_name || "No business name"}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
+              size="sm"
+              className="flex-1 sm:flex-none text-xs"
               onClick={() => navigate(`/bots/${id}/chat`)}
             >
-              Open Chat Playground
+              Open Playground
             </Button>
             <Button
               variant="outline"
+              size="sm"
+              className="flex-1 sm:flex-none text-xs"
               onClick={() => navigate(`/bots/${id}/analytics`)}
             >
-              View Analytics
+              Analytics
             </Button>
-            <Button variant="outline" onClick={handleDownloadQR}>
-              Download QR
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 sm:flex-none text-xs"
+              onClick={handleDownloadQR}
+            >
+              QR Code
             </Button>
-            <Button onClick={() => setIsEditOpen(true)}>Edit Bot</Button>
+            <Button
+              size="sm"
+              className="flex-1 sm:flex-none text-xs"
+              onClick={() => setIsEditOpen(true)}
+            >
+              Edit Bot
+            </Button>
           </div>
         </div>
       </div>
 
       <Tabs defaultValue="overview">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sources">Knowledge Sources</TabsTrigger>
-          <TabsTrigger value="quick-replies">Quick Replies</TabsTrigger>
-          <TabsTrigger value="leads">Leads</TabsTrigger>
-          <TabsTrigger value="embed">Embed</TabsTrigger>
-        </TabsList>
+        <div className="w-full overflow-x-auto no-scrollbar pb-1">
+          <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 justify-start">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="sources">Knowledge Sources</TabsTrigger>
+            <TabsTrigger value="quick-replies">Quick Replies</TabsTrigger>
+            <TabsTrigger value="leads">Leads</TabsTrigger>
+            <TabsTrigger value="embed">Embed</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Overview */}
         <TabsContent value="overview" className="space-y-6 pt-6">
@@ -267,12 +284,12 @@ function BotDetail() {
 
         {/* Knowledge Sources */}
         <TabsContent value="sources" className="space-y-4 pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold">Knowledge Sources</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-base sm:text-lg font-semibold">Knowledge Sources</h2>
               <Badge variant="secondary">{knowledgeSources?.count ?? 0}</Badge>
             </div>
-            <Button onClick={() => setIsUploadOpen(true)}>+ Add Source</Button>
+            <Button onClick={() => setIsUploadOpen(true)} size="sm">+ Add Source</Button>
           </div>
 
           {sourcesLoading ? (
@@ -282,9 +299,9 @@ function BotDetail() {
               <div className="h-20 animate-pulse rounded-lg bg-muted" />
             </div>
           ) : knowledgeSources?.results?.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-10 text-center">
-              <h3 className="font-medium">No knowledge sources yet</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
+            <div className="rounded-xl border border-dashed p-8 sm:p-10 text-center">
+              <h3 className="font-medium text-base">No knowledge sources yet</h3>
+              <p className="mt-2 text-xs sm:text-sm text-muted-foreground">
                 Upload PDFs, websites, YouTube videos, or text to train this
                 chatbot.
               </p>
@@ -297,28 +314,28 @@ function BotDetail() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border p-3.5 sm:p-4"
                 >
-                  <div>
-                    <h3 className="font-medium">{getSourceName(source)}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                  <div className="min-w-0">
+                    <h3 className="font-medium text-sm sm:text-base truncate">{getSourceName(source)}</h3>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       Uploaded {new Date(source.created_at).toLocaleString()}
                     </p>
-                    <p className="text-sm capitalize text-muted-foreground">
+                    <p className="text-xs capitalize text-muted-foreground mt-0.5">
                       {source.source_type}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2 pt-2 sm:pt-0 border-t sm:border-0 border-border/60">
                     <Dialog>
-                      <DialogTrigger className="text-sm text-muted-foreground hover:text-foreground hover:underline">
+                      <DialogTrigger className="text-xs text-muted-foreground hover:text-foreground hover:underline px-2 py-1">
                         View Text
                       </DialogTrigger>
-                      <DialogContent className="max-h-[70vh] overflow-y-auto">
+                      <DialogContent className="w-[calc(100vw-2rem)] sm:w-full max-h-[75vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>{getSourceName(source)}</DialogTitle>
+                          <DialogTitle className="text-base truncate">{getSourceName(source)}</DialogTitle>
                         </DialogHeader>
-                        <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                        <p className="whitespace-pre-wrap text-xs sm:text-sm text-muted-foreground">
                           {source.extracted_text ||
                             "No extracted text available."}
                         </p>
@@ -330,7 +347,7 @@ function BotDetail() {
                         href={source.file}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-sm text-primary hover:underline"
+                        className="text-xs text-primary hover:underline px-2 py-1"
                       >
                         Open
                       </a>
@@ -341,14 +358,14 @@ function BotDetail() {
                         href={source.source_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-sm text-primary hover:underline"
+                        className="text-xs text-primary hover:underline px-2 py-1"
                       >
                         Open
                       </a>
                     )}
 
                     <span
-                      className={`rounded-full px-3 py-1 text-xs ${
+                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
                         statusStyles[source.status] || statusStyles.pending
                       }`}
                     >
@@ -358,7 +375,7 @@ function BotDetail() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive h-8 px-2 text-xs"
                       onClick={() => handleDelete(source.id)}
                     >
                       Delete
@@ -369,6 +386,7 @@ function BotDetail() {
                       <Button
                         variant="secondary"
                         size="sm"
+                        className="h-8 px-2.5 text-xs"
                         onClick={() => handleRetry(source.id)}
                       >
                         Retry

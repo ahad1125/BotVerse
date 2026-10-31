@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import { register } from "../api/auth";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Mail, Lock, User, MessageSquareText } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,12 +22,15 @@ function Register() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const setTokens = useAuthStore((state) => state.setTokens);
+  const setUser = useAuthStore((state) => state.setUser);
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    if (password != confirmPassword) {
+    if (password !== confirmPassword) {
       setError("Passwords do not match");
       setLoading(false);
       return;
@@ -42,12 +44,21 @@ function Register() {
         full_name: fullName,
       });
 
-      navigate("/verify-otp", { state: { email } });
+      if (response?.data?.access && response?.data?.refresh) {
+        setTokens(response.data.access, response.data.refresh);
+        if (response.data.user) {
+          setUser(response.data.user);
+        }
+        toast.add({ description: "Account created successfully!" });
+        navigate("/dashboard");
+      } else {
+        toast.add({ description: "Account created! Please log in." });
+        navigate("/login");
+      }
     } catch (error) {
       const respData = error.response?.data;
       let errMsg = "Something went wrong.";
       if (respData?.errors) {
-        // Extract the first error message from the dictionary
         const firstErrorKey = Object.keys(respData.errors)[0];
         if (firstErrorKey) errMsg = respData.errors[firstErrorKey][0] || respData.errors[firstErrorKey];
       } else if (respData?.message) {
@@ -106,7 +117,7 @@ function Register() {
       </div>
 
       {/* Right: form */}
-      <div className="flex items-center justify-center px-6 py-12">
+      <div className="flex items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}

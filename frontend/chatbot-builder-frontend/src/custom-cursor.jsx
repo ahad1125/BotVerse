@@ -46,9 +46,9 @@ export function CustomCursor() {
 
   return (
     <>
-      <style>{`* { cursor: none !important; }`}</style>
+      <style>{`@media (pointer: fine) and (min-width: 1024px) { * { cursor: none !important; } }`}</style>
       <motion.div
-        className="pointer-events-none fixed left-0 top-0 z-[9999]"
+        className="pointer-events-none fixed left-0 top-0 z-[9999] hidden lg:block"
         style={{
           x: cursorX,
           y: cursorY,

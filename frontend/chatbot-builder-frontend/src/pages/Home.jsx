@@ -51,32 +51,34 @@ function Home() {
       <CustomCursor />
 
       {/* Nav */}
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-2.5">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 sm:py-6">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           <img
             src={logo}
             alt="BotVerse Logo"
             className="h-6 w-6 object-contain"
           />
-          <span className="text-lg font-semibold tracking-tight">BotVerse</span>
+          <span className="text-base sm:text-lg font-semibold tracking-tight">BotVerse</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <ThemeToggle />
-          <Button variant="ghost" onClick={() => navigate("/login")}>
+          <Button variant="ghost" size="sm" className="px-2.5 sm:px-4 text-xs sm:text-sm" onClick={() => navigate("/login")}>
             Log in
           </Button>
-          <Button onClick={() => navigate("/register")}>Get started</Button>
+          <Button size="sm" className="px-3 sm:px-4 text-xs sm:text-sm" onClick={() => navigate("/register")}>
+            Get started
+          </Button>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="mx-auto flex max-w-4xl flex-col items-center px-6 pt-16 pb-12 text-center">
+      <section className="mx-auto flex max-w-4xl flex-col items-center px-4 sm:px-6 pt-10 sm:pt-16 pb-10 sm:pb-12 text-center">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <Badge variant="secondary" className="mb-6 font-normal">
+          <Badge variant="secondary" className="mb-4 sm:mb-6 font-normal text-xs sm:text-sm max-w-xs sm:max-w-none text-center">
             Built for clinics, academies, and real estate agencies in Pakistan
           </Badge>
         </motion.div>
@@ -85,10 +87,10 @@ function Home() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.05, ease: "easeOut" }}
-          className="text-5xl font-semibold tracking-tight sm:text-6xl"
+          className="text-3xl font-semibold tracking-tight sm:text-5xl md:text-6xl leading-tight"
         >
           Turn your docs into a chatbot
-          <br />
+          <br className="hidden sm:inline" />{" "}
           your customers can talk to.
         </motion.h1>
 
@@ -96,7 +98,7 @@ function Home() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-          className="mt-6 max-w-2xl text-lg text-muted-foreground"
+          className="mt-4 sm:mt-6 max-w-2xl text-sm sm:text-lg text-muted-foreground leading-relaxed"
         >
           Upload a PDF, Word doc, or spreadsheet, paste a URL, or drop a YouTube
           link. Your bot answers in English or Urdu, live on your site in
@@ -107,9 +109,9 @@ function Home() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
-          className="mt-10"
+          className="mt-8 sm:mt-10"
         >
-          <Button size="lg" onClick={() => navigate("/register")}>
+          <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base h-11 px-6" onClick={() => navigate("/register")}>
             Start building — it's free
           </Button>
         </motion.div>
@@ -118,7 +120,7 @@ function Home() {
       {/* Hero visual: mock chat */}
       <motion.section
         {...fadeUp(0.05)}
-        className="mx-auto max-w-2xl px-6 pb-20"
+        className="mx-auto max-w-2xl px-4 sm:px-6 pb-12 sm:pb-20"
       >
         <div className="rounded-xl border bg-card p-4 shadow-sm">
           <div className="mb-3 text-xs text-muted-foreground">
@@ -138,7 +140,7 @@ function Home() {
       </motion.section>
 
       {/* How it works */}
-      <section className="mx-auto max-w-5xl px-6 pb-20">
+      <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-12 sm:pb-20">
         <motion.div {...fadeUp()} className="mb-10 text-center">
           <h2 className="text-3xl font-semibold tracking-tight">
             How it works
@@ -377,7 +379,7 @@ function Home() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 text-sm text-muted-foreground">
           <span>© {new Date().getFullYear()} BotVerse</span>
           <div className="flex gap-6">
-            <span>Created by a.</span>
+            <span>Created by Abdul Ahad</span>
           </div>
         </div>
       </footer>

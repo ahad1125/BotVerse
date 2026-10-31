@@ -144,32 +144,36 @@ class ChatView(APIView):
                 lead.save()
                 
                 
-        fallback_message=bot.fallback_message or f'Sorry, I dont have that information.Please contact us directly.'
+        fallback_message = bot.fallback_message or 'Sorry, I dont have that information. Please contact us directly.'
             
+        try:
+            chunks = retrieve_relevant_chunks(bot_pk, message_text)
+            answer, citations = generate_answer(
+                bot=bot,
+                question=message_text,
+                retreived_chunks=chunks,
+                fallback_message=fallback_message,
+                lead_captured=lead_captured,
+            )
+        except Exception as e:
+            chunks = []
+            answer = fallback_message
+            citations = []
         
-        
-        chunks=retrieve_relevant_chunks(bot_pk,message_text)
-        answer,citations=generate_answer(bot=bot,question=message_text,
-                               retreived_chunks=chunks,
-                               fallback_message=fallback_message,
-                               lead_captured=lead_captured,
-                               )
-        
-        
-        best_distance=chunks[0][1] if chunks else 0
-        
-        
+        best_distance = chunks[0][1] if chunks else 0
                 
-        Message.objects.create(conversation=conversation,
-                               sender='bot',
-                               content=answer,
-                               confidence_score=best_distance)
+        Message.objects.create(
+            conversation=conversation,
+            sender='bot',
+            content=answer,
+            confidence_score=best_distance
+        )
         
         return Response({
-            'conversation_id':conversation.id,
-            'answer':answer,
-            'citations':citations,
-        },status=status.HTTP_200_OK)
+            'conversation_id': conversation.id,
+            'answer': answer,
+            'citations': citations,
+        }, status=status.HTTP_200_OK)
         
         
 class QuickViewViewSet(ModelViewSet):

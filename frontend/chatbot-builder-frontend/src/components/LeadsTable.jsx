@@ -65,10 +65,10 @@ function LeadsTable({ botId }) {
   }
 
   return (
-    <div className="rounded-xl border bg-card p-5 space-y-4 shadow-xs">
-      <div className="flex items-center justify-between border-b pb-4">
+    <div className="rounded-xl border bg-card p-4 sm:p-5 space-y-4 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
             <Users className="h-4 w-4" />
           </div>
           <div>
@@ -82,7 +82,7 @@ function LeadsTable({ botId }) {
         <Button
           variant="outline"
           size="sm"
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto justify-center text-xs"
           onClick={() => exportToCSV(leads)}
           disabled={!leads.length}
         >
@@ -96,7 +96,7 @@ function LeadsTable({ botId }) {
           No leads captured yet. The bot collects contact info when customers book or purchase.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border">
+        <div className="overflow-x-auto rounded-lg border">
           <Table>
             <TableHeader className="bg-muted/40">
               <TableRow>

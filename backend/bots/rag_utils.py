@@ -1,5 +1,7 @@
 
 import os
+import time
+import logging
 from google import genai
 import json
 import re
@@ -7,8 +9,69 @@ import requests
 from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 
+logger = logging.getLogger(__name__)
 
-gemini_client=genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
+gemini_client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
+
+# Fallback generation models in priority order
+PRIMARY_MODEL = os.getenv('GEMINI_MODEL', 'gemini-3.5-flash-lite')
+GENERATION_MODELS = [
+    PRIMARY_MODEL,
+    'gemini-3.5-flash-lite',
+    'gemini-flash-lite-latest',
+    'gemini-flash-latest',
+    'gemini-3.8-flash',
+    'gemini-3.1-flash-lite',
+]
+# Deduplicate while preserving order
+GENERATION_MODELS = list(dict.fromkeys(GENERATION_MODELS))
+
+
+def generate_content_with_retry_and_fallback(prompt, models=None, max_retries_per_model=2):
+    """
+    Attempts generation with primary model, retries with exponential backoff on transient errors
+    (503 UNAVAILABLE, 429 RESOURCE_EXHAUSTED, 500, 502, 504), and gracefully falls back to alternate
+    models in the chain if a model is unavailable or overloaded.
+    """
+    if models is None:
+        models = GENERATION_MODELS
+
+    last_error = None
+    for model_name in models:
+        for attempt in range(max_retries_per_model):
+            try:
+                response = gemini_client.models.generate_content(
+                    model=model_name,
+                    contents=prompt
+                )
+                if response and hasattr(response, 'text') and response.text:
+                    return response
+            except Exception as e:
+                last_error = e
+                err_str = str(e).lower()
+                is_transient = any(code in err_str for code in [
+                    '503', 'unavailable', 'high demand', 'spikes in demand',
+                    '429', 'resource_exhausted', 'rate limit', 'overloaded',
+                    '500', '502', '504', 'deadline_exceeded'
+                ])
+                logger.warning(
+                    f"Gemini attempt {attempt + 1}/{max_retries_per_model} on model '{model_name}' failed: {e}"
+                )
+
+                # If deprecated or not found (404), skip immediately to next model
+                if '404' in err_str or 'not_found' in err_str or 'no longer available' in err_str:
+                    break
+
+                if is_transient and attempt < max_retries_per_model - 1:
+                    sleep_time = 1.0 * (2 ** attempt)
+                    time.sleep(sleep_time)
+                    continue
+                else:
+                    # Switch to next fallback model
+                    break
+
+    logger.error(f"All Gemini generation models failed. Last error: {last_error}")
+    raise last_error
 
 
 def get_gemini_embeddings(texts):
@@ -256,40 +319,31 @@ def generate_answer(bot,question,retreived_chunks,fallback_message,confidence_th
     Assistant: 
     """
     
-    response=gemini_client.models.generate_content(
-        # model='gemini-3.5-flash',
-        # model='gemini-2.5-flash-lite',
-        model='gemini-3.1-flash-lite',
-        contents=prompt
-    )
+    try:
+        response = generate_content_with_retry_and_fallback(prompt)
+        answer_text = response.text.strip()
+    except Exception as e:
+        logger.error(f"Failed to generate answer for bot {getattr(bot, 'id', 'unknown')}: {e}")
+        return fallback_message, []
     
-    print([(m['source_name'], d) for _, d, m in retreived_chunks])
-    
-    if response.text.strip() == fallback_message.strip():
-        return response.text, []
+    if answer_text == fallback_message.strip():
+        return answer_text, []
 
-    
-    citations=[]
-    seen=set()
-    for _,_, metadata in relevant_chunks:
-        
-        
-        if metadata['source_id'] in seen:
+    citations = []
+    seen = set()
+    for _, _, metadata in relevant_chunks:
+        if metadata.get('source_id') in seen:
             continue
-        
-        seen.add(metadata['source_id'])
-        
+        seen.add(metadata.get('source_id'))
         citations.append({
-            'id':metadata['source_id'],
-            'name':metadata['source_name'],
-            'type':metadata['source_type'],
+            'id': metadata.get('source_id'),
+            'name': metadata.get('source_name'),
+            'type': metadata.get('source_type'),
         })
-    return response.text,citations
+    return answer_text, citations
 
 
 def extract_lead_info(message_text):
-    
-    
     prompt = f"""
         Analyze this customer message.
 
@@ -311,21 +365,18 @@ def extract_lead_info(message_text):
         {message_text}
         """
     
-    response=gemini_client.models.generate_content(
-        # model='gemini-3.5-flash',
-        # model='gemini-2.5-flash-lite',
-        model='gemini-3.1-flash-lite',
-        contents=prompt
-    )
-    
-    
     try:
-        data=json.loads(response.text.strip())
+        response = generate_content_with_retry_and_fallback(prompt, max_retries_per_model=1)
+        raw_text = response.text.strip()
+        # Clean potential markdown wrapping
+        if raw_text.startswith("```"):
+            raw_text = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_text, flags=re.MULTILINE).strip()
+        data = json.loads(raw_text)
         if data.get('name') or data.get('phone') or data.get('email'):
             return data
         return None
-    
-    except (AttributeError,json.JSONDecodeError):
+    except Exception as e:
+        logger.warning(f"Lead info extraction skipped or failed gracefully: {e}")
         return None
         
     

@@ -4,9 +4,7 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/figtree";
 
-@custom-variant dark {
-  &:is(.dark *)
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: oklch(1 0 0);
@@ -129,6 +127,14 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 

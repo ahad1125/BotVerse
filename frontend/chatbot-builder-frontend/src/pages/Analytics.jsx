@@ -59,13 +59,13 @@ function MetricCard({
   return (
     <motion.div {...fadeUp(delay)}>
       <Card className="shadow-xs hover:shadow-sm transition-all duration-300">
-        <CardContent className="p-5">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium uppercase tracking-wider">
-            <Icon className="h-3.5 w-3.5 text-primary" />
-            {label}
+        <CardContent className="p-3.5 sm:p-5">
+          <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider truncate">
+            <Icon className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="truncate">{label}</span>
           </div>
           <p
-            className={`mt-2 text-3xl font-bold tracking-tight ${valueClassName}`}
+            className={`mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-bold tracking-tight ${valueClassName}`}
           >
             {value}
           </p>
@@ -126,7 +126,7 @@ function Analytics() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-8">
+    <div className="mx-auto max-w-5xl space-y-5 sm:space-y-6 p-4 sm:p-6 md:p-8">
       {/* Header */}
       <motion.div {...fadeUp()} className="flex items-center justify-between border-b pb-4">
         <div>
@@ -134,22 +134,22 @@ function Analytics() {
             variant="ghost"
             size="sm"
             onClick={() => navigate(`/bots/${id}`)}
-            className="mb-2 -ml-2 gap-1 text-muted-foreground hover:text-foreground"
+            className="mb-2 -ml-2 gap-1 text-muted-foreground hover:text-foreground text-xs"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Bot
           </Button>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             {bot?.name}{" "}
-            <span className="font-normal text-muted-foreground text-lg">
+            <span className="font-normal text-muted-foreground text-sm sm:text-lg block sm:inline">
               / Performance Analytics
             </span>
           </h1>
         </div>
       </motion.div>
 
-      {/* Metric row — 4 across, small */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      {/* Metric row — 4 across on desktop, 2 across on mobile */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-4">
         <MetricCard
           icon={MessageSquareText}
           label="Conversations"
@@ -158,28 +158,28 @@ function Analytics() {
         />
         <MetricCard
           icon={AlertCircle}
-          label="Unanswered Queries"
+          label="Unanswered"
           value={data.unanswered_count ?? "—"}
           valueClassName="text-amber-500"
           delay={0.04}
         />
         <MetricCard
           icon={Users}
-          label="Leads Captured"
+          label="Leads"
           value={data.leads_count ?? "—"}
           delay={0.06}
         />
         <MetricCard
           icon={Zap}
-          label="Resolution Rate"
+          label="Resolution"
           value={data.answer_rate !== undefined ? `${data.answer_rate}%` : "—"}
           valueClassName="text-emerald-500"
           delay={0.08}
         />
       </div>
 
-      {/* Two detailed charts side by side */}
-      <div className="grid gap-6 sm:grid-cols-2">
+      {/* Two detailed charts side by side on desktop, stacked on mobile */}
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
         {/* Conversations per Day */}
         <motion.div {...fadeUp(0.1)}>
           <Card className="shadow-xs">
@@ -286,7 +286,7 @@ function Analytics() {
       </div>
 
       {/* Top questions + unanswered side by side */}
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
         {/* Top Questions */}
         <motion.div {...fadeUp(0.16)}>
           <Card className="shadow-xs h-full">
