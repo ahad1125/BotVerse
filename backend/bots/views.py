@@ -69,6 +69,11 @@ class KnowledgeSourceViewSet(ModelViewSet):
         instance=serializer.save(bot=bot)
         
         process_knowledge_source.delay(instance.id)
+
+    def perform_destroy(self, instance):
+        from .models import KnowledgeChunk
+        KnowledgeChunk.objects.filter(bot=instance.bot, source_id=str(instance.id)).delete()
+        instance.delete()
         
     @action(detail=True, methods=['post'])
     def retry(self, request, bot_pk=None, pk=None):

@@ -96,7 +96,7 @@ def get_gemini_embeddings(texts):
         raise Exception(f"Gemini API Embedding failed: {e}")
 
 
-def retrieve_relevant_chunks(bot_id, question, top_k=3):
+def retrieve_relevant_chunks(bot_id, question, top_k=5):
     from pgvector.django import CosineDistance
     from bots.models import KnowledgeChunk
     
