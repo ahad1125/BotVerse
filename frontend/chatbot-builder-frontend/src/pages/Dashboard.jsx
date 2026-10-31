@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import useLogout from "../hooks/useLogout";
 import useAuthStore from "../store/authStore";
 import useCurrentUser from "../hooks/useCurrentUser";
+import queryClient from "../lib/queryClient";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,8 @@ import logo from "../assets/logo.png";
 function Dashboard() {
   const { data, isLoading, error } = useBots();
   const { data: userData } = useCurrentUser();
-  const user = userData?.data;
+  const authUser = useAuthStore((state) => state.user);
+  const user = userData?.data || authUser;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBot, setSelectedBot] = useState(null);
@@ -51,6 +53,7 @@ function Dashboard() {
     logoutMutation.mutate(refreshToken, {
       onSettled: () => {
         toast.add({ description: "Logged out successfully." });
+        queryClient.clear();
         clearAuth();
         navigate("/", { replace: true });
       },

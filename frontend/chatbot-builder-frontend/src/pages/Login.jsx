@@ -1,11 +1,11 @@
 import React from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
-import { useNavigate } from "react-router-dom";
 import { login } from "../api/auth";
+import queryClient from "../lib/queryClient";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Mail, Lock, MessageSquareText } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ function Login() {
   const navigate = useNavigate();
 
   const setTokens = useAuthStore((state) => state.setTokens);
+  const setUser = useAuthStore((state) => state.setUser);
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -33,7 +34,14 @@ function Login() {
         email,
         password,
       });
+
+      // Clear any cached queries from a prior session to avoid stale data leakage
+      queryClient.clear();
+
       setTokens(response.data.access, response.data.refresh);
+      if (response.data.user) {
+        setUser(response.data.user);
+      }
       toast.add({ description: "Logged in successfully." });
       navigate("/dashboard");
     } catch (error) {

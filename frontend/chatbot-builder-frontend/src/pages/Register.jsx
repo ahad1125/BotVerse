@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import { register } from "../api/auth";
+import queryClient from "../lib/queryClient";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 
@@ -45,6 +46,7 @@ function Register() {
       });
 
       if (response?.data?.access && response?.data?.refresh) {
+        queryClient.clear();
         setTokens(response.data.access, response.data.refresh);
         if (response.data.user) {
           setUser(response.data.user);

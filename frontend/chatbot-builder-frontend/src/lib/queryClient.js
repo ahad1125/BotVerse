@@ -1,25 +1,14 @@
 import { QueryClient } from '@tanstack/react-query'
 
-
 const queryClient = new QueryClient({
     defaultOptions: {
-        queries: { // get requests
+        queries: {
             retry: 1,
             refetchOnWindowFocus: false,
-            staleTime: 1000 * 60 * 5,
-
-        }, //mutuations -> post,put,delete
+            refetchOnMount: true,
+            staleTime: 1000 * 10, // 10 seconds instead of 5 minutes
+        },
     },
 })
 
 export default queryClient;
-
-// From now on, instead of writing:
-
-// useEffect(() => {
-//   fetchBots();
-// }, []);
-
-// you'll write:
-
-// const { data, isLoading, error } = useBots();

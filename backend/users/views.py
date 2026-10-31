@@ -49,11 +49,23 @@ class RegisterView(generics.CreateAPIView):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     
-    
     def post(self,request,*args,**kwargs):
         response=super().post(request,*args,**kwargs)
         if response.status_code==200:
-            return api_response(True,data=response.data,message='Login Successful')
+            email = request.data.get('email', '')
+            user_data = None
+            if email:
+                try:
+                    user = User.objects.get(email__iexact=email)
+                    user_data = UserSerializer(user).data
+                except User.DoesNotExist:
+                    pass
+            
+            data = {
+                **response.data,
+                'user': user_data
+            }
+            return api_response(True,data=data,message='Login Successful')
         return api_response(False,errors=response.data,message='Invalid credentials',
                             status_code=status.HTTP_401_UNAUTHORIZED)
         
