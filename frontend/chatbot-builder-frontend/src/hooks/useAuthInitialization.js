@@ -16,12 +16,15 @@ function useAuthInitialization() {
             }
             try {
                 const response = await getCurrentUser();
-                // console.log(response.data);
-
                 setUser(response.data)
             } catch (error) {
-                console.error('Failed to initialize authentication', error)
-                logout();
+                console.error('Failed to initialize authentication', error);
+                // Only force-logout on 401 (bad/expired token).
+                // Network errors, 500s, and backend cold-start timeouts must NOT
+                // log the user out — the token is still valid, the server was just unavailable.
+                if (error?.response?.status === 401) {
+                    logout();
+                }
             }
         }
         initializeAuth();
