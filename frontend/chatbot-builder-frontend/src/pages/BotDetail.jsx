@@ -9,7 +9,7 @@ import CreateBotModal from "../components/CreateBotModal";
 import api from "../api/axios";
 import { motion } from "framer-motion";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, QrCode, Link2, Check } from "lucide-react";
 import EmbedCodeSection from "@/components/EmbedCodeSection";
 import QuickRepliesManager from "@/components/QuickRepliesManager";
 import LeadsTable from "@/components/LeadsTable";
@@ -37,6 +37,27 @@ function BotDetail() {
     useKnowledgeSources(id);
   const deleteMutation = useDeleteKnowledgeSource(id);
   const [deleteSourceId, setDeleteSourceId] = useState(null);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleCopyPublicLink = async () => {
+    const publicUrl = `${window.location.origin}/chat/${id}`;
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      setCopiedLink(true);
+      toast.add({
+        title: "Link copied!",
+        description: "Public chat link copied to clipboard.",
+        type: "success",
+      });
+      setTimeout(() => setCopiedLink(false), 2000);
+    } catch (err) {
+      toast.add({
+        title: "Copy failed",
+        description: "Failed to copy public link.",
+        type: "error",
+      });
+    }
+  };
 
   const getSourceName = (source) => {
     if (source.file) return source.file.split("/").pop();
@@ -200,10 +221,29 @@ function BotDetail() {
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 sm:flex-none text-xs"
+              className="flex-1 sm:flex-none text-xs gap-1.5"
               onClick={handleDownloadQR}
             >
-              QR Code
+              <QrCode className="h-3.5 w-3.5" />
+              <span>QR Code</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 sm:flex-none text-xs gap-1.5"
+              onClick={handleCopyPublicLink}
+            >
+              {copiedLink ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-green-500" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Link2 className="h-3.5 w-3.5" />
+                  <span>Copy Link</span>
+                </>
+              )}
             </Button>
             <Button
               size="sm"
